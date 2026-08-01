@@ -118,7 +118,7 @@ function drawUnit(t,st){
      a feather. It is built as a real tube instead: one tapered body polygon
      down both offsets of the spine, then shading across it (lit crown, dark
      belly) and ribs drawn as short cross-strokes. */
-  function whip(P,r0,r1,N){
+  function whip(P,r0,r1,N,scar){
     var pts=[],i2;for(i2=0;i2<=N;i2++)pts.push(cub(P,i2/N));
     var rad=function(u){return r0+(r1-r0)*u;};
     var nrm=[];
@@ -158,6 +158,22 @@ function drawUnit(t,st){
       g.beginPath();g.moveTo(q5[0]+n5[0]*r5*0.92,q5[1]+n5[1]*r5*0.92);
       g.lineTo(q5[0]-n5[0]*r5*0.2,q5[1]-n5[1]*r5*0.2);g.stroke();
     }
+    /* OP · menace pass (squiddy) — battle record on the limbs: a charred
+       gouge carved across the tube at scar-u. Heavy dark cross-strokes
+       (a trench through the crown into the belly) with one faint lit lip
+       on the approach side — matte, worn, carried in both states. */
+    if(scar!==undefined){
+      var si7=Math.max(1,Math.min(N-2,Math.round(scar*N)));
+      for(var s7=-1;s7<=1;s7++){
+        var q7=pts[si7+s7],n7=nrm[si7+s7],r7=rad((si7+s7)/N);
+        g.strokeStyle="rgba(2,4,7,"+(s7===0?0.9:0.62)+")";g.lineWidth=s7===0?4.4:2.4;
+        g.beginPath();g.moveTo(q7[0]+n7[0]*r7*0.95,q7[1]+n7[1]*r7*0.95);
+        g.lineTo(q7[0]-n7[0]*r7*0.8,q7[1]-n7[1]*r7*0.8);g.stroke();}
+      var qe7=pts[si7-1],ne7=nrm[si7-1],re7=rad((si7-1)/N);
+      g.strokeStyle="rgba(178,194,220,"+(offl?0.06:0.15)+")";g.lineWidth=1;
+      g.beginPath();g.moveTo(qe7[0]+ne7[0]*re7*0.9,qe7[1]+ne7[1]*re7*0.9);
+      g.lineTo(qe7[0]-ne7[0]*re7*0.5,qe7[1]-ne7[1]*re7*0.5);g.stroke();
+    }
     /* RUN 1 · LOOP 2 (squiddy) — the EMITTERS CAST. Fifteen red berries and
        the whips crossing in front of them carried only the cool blue-grey
        crown. Every segment within range of the stare now takes a warm red
@@ -183,25 +199,28 @@ function drawUnit(t,st){
     g.restore();
     return pts;
   }
-  function grapple(x,y,ang,open,alive){
+  function grapple(x,y,ang,open,alive,scl){
     /* RUN 1 · LOOP 3 (squiddy) — the low claws sit in the figure's own
        shadow: a grapple hanging a hand above the deck cannot catch the
        full cool key, and its bright prongs were reading as lit patches ON
        the walkway. The polished stroke now fades with proximity to the
        deck line (unit y 560); high claws keep their shine. */
+    /* OP · menace pass (squiddy) — scl: the one claw presented to the
+       viewer's side of the room draws larger, the 2D cue for NEARER. */
+    scl=scl||1;
     var shd=offl?1:1-0.72*Math.max(0,Math.min(1,(y-455)/95));
     [-1,0,1].forEach(function(k){
       var a2=ang+k*(0.34+open*0.5);
-      var tx=x+Math.cos(a2)*21, ty=y+Math.sin(a2)*21;
-      var hx=tx+Math.cos(a2+ (k>=0?1.7:-1.7))*6.4, hy=ty+Math.sin(a2+(k>=0?1.7:-1.7))*6.4;
-      g.strokeStyle="#05080e";g.lineWidth=6;g.lineCap="round";
+      var tx=x+Math.cos(a2)*21*scl, ty=y+Math.sin(a2)*21*scl;
+      var hx=tx+Math.cos(a2+ (k>=0?1.7:-1.7))*6.4*scl, hy=ty+Math.sin(a2+(k>=0?1.7:-1.7))*6.4*scl;
+      g.strokeStyle="#05080e";g.lineWidth=6*scl;g.lineCap="round";
       g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(tx,ty,hx,hy);g.stroke();
-      g.strokeStyle=offl?"#3a4350":"rgba(139,152,172,"+(0.16+0.84*shd)+")";g.lineWidth=2.3;
+      g.strokeStyle=offl?"#3a4350":"rgba(139,152,172,"+(0.16+0.84*shd)+")";g.lineWidth=2.3*scl;
       g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(tx,ty,hx,hy);g.stroke();});
-    g.fillStyle="#04070c";g.beginPath();g.arc(x,y,7,0,7);g.fill();
-    g.strokeStyle=eH;g.lineWidth=1.2;g.beginPath();g.arc(x,y,7,0,7);g.stroke();
-    if(alive&&!offl){g.fillStyle=rdh(0.9);g.beginPath();g.arc(x,y,2.4,0,7);g.fill();
-      RE.fillStyle=rd(0.5);RE.beginPath();RE.arc(x,y,4.2,0,7);RE.fill();}
+    g.fillStyle="#04070c";g.beginPath();g.arc(x,y,7*scl,0,7);g.fill();
+    g.strokeStyle=eH;g.lineWidth=1.2;g.beginPath();g.arc(x,y,7*scl,0,7);g.stroke();
+    if(alive&&!offl){g.fillStyle=rdh(0.9);g.beginPath();g.arc(x,y,2.4*scl,0,7);g.fill();
+      RE.fillStyle=rd(0.5);RE.beginPath();RE.arc(x,y,4.2*scl,0,7);RE.fill();}
   }
   var sw=offl?0:Math.sin(t*0.9), sw2=offl?0:Math.cos(t*0.7);
 
@@ -229,16 +248,25 @@ function drawUnit(t,st){
        behind that tentacle and only the claw re-emerged, orphaned. It now
        hangs down into the open gap left of the front-right whip, with its
        last run of stem in clear air before the claw. */
-    [[cx+17+HX,RT-12],[cx+112,RT+104],[cx+150,470],[cx+75,556-sw*6]]
+    /* OP · menace pass (squiddy) — this is now the PRESENTED claw: the tip
+       lifts a touch (clear of the foreground tray at any swing phase) and
+       the grapple below draws at 1.35x with its prongs held OPEN, aimed at
+       the viewer's side of the room. Less taper on the stem so the limb
+       reads as coming toward the camera, not just ending in a big hand. */
+    [[cx+17+HX,RT-12],[cx+112,RT+104],[cx+150,470],[cx+75,540-sw*6]]
   ];
   /* These eight are BACK limbs: they run out from behind the hull and the
      hub covers where they meet it, so they need no visible attachment —
      the same division codex uses for its rear legs. Roots are pulled up
      into the drum's footprint so no stub is left showing beside it. */
   BACK.forEach(function(P,bi){
-    var pts=whip(P,12,4.2,52);
+    /* OP · menace pass (squiddy) — bi 1 carries a carved scar mid-stem;
+       bi 5 is the presented claw: fatter tip, 1.35x open grapple. */
+    var fore=(bi===5&&!offl);
+    var pts=whip(P,12,fore?5.6:4.2,52,bi===1?0.45:undefined);
     var e=pts[pts.length-1],pe=pts[pts.length-2];
-    grapple(e[0],e[1],Math.atan2(e[1]-pe[1],e[0]-pe[0]),offl?0:0.5+0.3*Math.sin(t*2+bi),true);
+    grapple(e[0],e[1],Math.atan2(e[1]-pe[1],e[0]-pe[0]),
+      offl?0:(fore?1.15+0.08*Math.sin(t*2+bi):0.5+0.3*Math.sin(t*2+bi)),true,fore?1.35:1);
   });
 
   /* ---- THE ROOT HUB ----
@@ -421,7 +449,8 @@ function drawUnit(t,st){
   g.save();g.beginPath();
   g.moveTo(HC.x-92,HC.y+20);g.lineTo(HC.x,HC.y+8);g.lineTo(HC.x+92,HC.y+20);
   g.lineTo(HC.x+92,HC.y+48);g.lineTo(HC.x-92,HC.y+48);g.closePath();g.clip();
-  cavity(g,HC.x-92,HC.y+8,184,42,0.68);g.restore();
+  /* OP · menace pass (squiddy) — the V under the ridges digs a shade deeper */
+  cavity(g,HC.x-92,HC.y+8,184,42,0.78);g.restore();
   // seam cracks wandering the crown; rivets where the panels pin
   g.strokeStyle="rgba(4,8,14,0.6)";g.lineWidth=1.1;
   g.beginPath();g.moveTo(HC.x-46,HC.y-22);g.lineTo(HC.x-34,HC.y-10);g.lineTo(HC.x-40,HC.y-2);g.stroke();
@@ -492,6 +521,26 @@ function drawUnit(t,st){
     if(!offl){g.fillStyle=rdh(0.8);g.beginPath();g.arc(HC.x+sg*70,HC.y+38,2.2,0,7);g.fill();
       RE.fillStyle=rd(0.5);RE.beginPath();RE.arc(HC.x+sg*70,HC.y+38,3.6,0,7);RE.fill();}
     else{g.fillStyle="rgba(150,168,190,0.2)";g.beginPath();g.arc(HC.x+sg*70-1,HC.y+37,1.2,0,7);g.fill();}});
+  /* OP · menace pass (squiddy) — battle record, second sortie. Drawn AFTER
+     the greebles so the damage cuts through whatever plating it hit.
+     (1) A deep gouge raked across the right hump and its raised plate —
+     dark trench, faint lit lip on the strike side, and inside it a hint of
+     UNDER-STRUCTURE: two dull bronze cross-ribs where the carapace skin is
+     gone. Matte, dim, not an emitter. (2) A shorter carved nick low on the
+     left cheek with a scorch shadow spreading round it. */
+  poly(g,[[HC.x+40,HC.y-30],[HC.x+70,HC.y-19],[HC.x+68,HC.y-12],[HC.x+37,HC.y-24]]);
+  g.fillStyle="rgba(2,4,8,0.95)";g.fill();
+  pl(g,HC.x+48,HC.y-25,HC.x+48+3,HC.y-16,"rgba(122,78,48,"+(offl?0.22:0.4)+")",1.6);
+  pl(g,HC.x+57,HC.y-22,HC.x+57+3,HC.y-13,"rgba(146,94,56,"+(offl?0.16:0.3)+")",1.4);
+  pl(g,HC.x+40,HC.y-30,HC.x+70,HC.y-19,"rgba(198,216,246,"+(offl?0.07:0.17)+")",1.1);
+  /* (2, corrected after render 1) the nick sits on the LEFT TEMPLE edge —
+     the first placement fell inside the bowl and vanished into the pit. */
+  (function(){var sc9=g.createRadialGradient(HC.x-90,HC.y+10,2,HC.x-90,HC.y+10,20);
+    sc9.addColorStop(0,"rgba(4,3,2,0.45)");sc9.addColorStop(1,"rgba(4,3,2,0)");
+    g.fillStyle=sc9;g.beginPath();g.arc(HC.x-90,HC.y+10,20,0,7);g.fill();})();
+  poly(g,[[HC.x-100,HC.y+4],[HC.x-80,HC.y+12],[HC.x-81,HC.y+16],[HC.x-101,HC.y+8]]);
+  g.fillStyle="rgba(2,4,8,0.9)";g.fill();
+  pl(g,HC.x-100,HC.y+4,HC.x-80,HC.y+12,"rgba(198,216,246,"+(offl?0.05:0.13)+")",1);
   // stencil, worn, low on the right flank
   g.save();g.globalAlpha=offl?0.12:0.24;g.fillStyle="#c6d2e4";
   g.font="700 8px ui-monospace,monospace";g.textAlign="center";
@@ -505,14 +554,17 @@ function drawUnit(t,st){
      lens instead: its top follows the brow V (high in the middle, falling
      to the temples) and its floor follows the chin. */
   var FC={x:HC.x,y:HC.y+46};
-  g.beginPath();
-  g.moveTo(HC.x-84,HC.y+24);
-  g.bezierCurveTo(HC.x-56,HC.y+7, HC.x-24,HC.y+3, HC.x,HC.y+6);
-  g.bezierCurveTo(HC.x+24,HC.y+3, HC.x+56,HC.y+7, HC.x+84,HC.y+24);
-  g.bezierCurveTo(HC.x+86,HC.y+48, HC.x+62,HC.y+70, HC.x+34,HC.y+79);
-  g.bezierCurveTo(HC.x+14,HC.y+85, HC.x-14,HC.y+85, HC.x-34,HC.y+79);
-  g.bezierCurveTo(HC.x-62,HC.y+70, HC.x-86,HC.y+48, HC.x-84,HC.y+24);
-  g.closePath();
+  function bowlPath(c){
+    c.beginPath();
+    c.moveTo(HC.x-84,HC.y+24);
+    c.bezierCurveTo(HC.x-56,HC.y+7, HC.x-24,HC.y+3, HC.x,HC.y+6);
+    c.bezierCurveTo(HC.x+24,HC.y+3, HC.x+56,HC.y+7, HC.x+84,HC.y+24);
+    c.bezierCurveTo(HC.x+86,HC.y+48, HC.x+62,HC.y+70, HC.x+34,HC.y+79);
+    c.bezierCurveTo(HC.x+14,HC.y+85, HC.x-14,HC.y+85, HC.x-34,HC.y+79);
+    c.bezierCurveTo(HC.x-62,HC.y+70, HC.x-86,HC.y+48, HC.x-84,HC.y+24);
+    c.closePath();
+  }
+  bowlPath(g);
   var fg2=g.createLinearGradient(0,HC.y+3,0,HC.y+85);
   fg2.addColorStop(0,offl?"#161b24":"#222937");fg2.addColorStop(0.5,offl?"#0e1219":"#141a25");fg2.addColorStop(1,"#080b11");
   g.fillStyle=fg2;g.fill();
@@ -522,6 +574,22 @@ function drawUnit(t,st){
   // plate scratches — the face has been CLOSE to things
   pl(g,HC.x-52,HC.y+30,HC.x-20,HC.y+44,"rgba(198,216,246,"+(offl?0.05:0.12)+")",1);
   pl(g,HC.x+26,HC.y+52,HC.x+50,HC.y+40,"rgba(198,216,246,"+(offl?0.04:0.1)+")",1);
+  /* OP · menace pass (squiddy) — the hooded glare. Two shadow passes on the
+     BOWL PLATE, drawn before the eyes so no berry loses a level: (1) the
+     brow shelf casts a real shadow band down over the upper socket row —
+     the stare comes out from under a hood; (2) a pit falloff darkens the
+     bowl toward its own rim, so the plate between the berries falls to
+     near-black and the eyes burn out of a hole rather than sit on a panel.
+     Both clipped to the bowl and dying to zero inside it — no printed edge. */
+  g.save();bowlPath(g);g.clip();
+  var hood=g.createLinearGradient(0,HC.y+3,0,HC.y+36);
+  hood.addColorStop(0,"rgba(1,3,6,"+(offl?0.4:0.6)+")");hood.addColorStop(1,"rgba(1,3,6,0)");
+  g.fillStyle=hood;g.fillRect(HC.x-88,HC.y+2,176,36);
+  var pit=g.createRadialGradient(HC.x,HC.y+44,6,HC.x,HC.y+44,92);
+  pit.addColorStop(0,"rgba(2,4,8,0.2)");pit.addColorStop(0.6,"rgba(2,4,8,0.3)");
+  pit.addColorStop(1,"rgba(2,4,8,0.52)");
+  g.fillStyle=pit;bowlPath(g);g.fill();
+  g.restore();
   /* the EYES: glossy red berries in chrome sockets, spider-wrapped.
      [dx,dy,r] from face centre; one is dead and cracked. */
   /* The cluster is authored for THIS face, not scaled down from the tall
@@ -582,6 +650,30 @@ function drawUnit(t,st){
     cl.addColorStop(0,rd(0.26*pulse+0.12));cl.addColorStop(0.6,rd(0.06));cl.addColorStop(1,rd(0));
     g.fillStyle=cl;g.beginPath();g.arc(HC.x,FY+4,120,0,7);g.fill();g.restore();
   }
+  /* OP · menace pass (squiddy) — a dark vignette on the skull round the
+     face bowl: an annulus of shadow ringing the stare, so the carapace
+     turns down into the pit from every side. source-atop (unit pixels
+     only) and the gradient returns to zero before its own fill bounds —
+     no printable edge in either direction. */
+  g.save();g.globalCompositeOperation="source-atop";
+  g.translate(HC.x,FY);g.scale(1,0.78);
+  var fvg=g.createRadialGradient(0,0,10,0,0,150);
+  fvg.addColorStop(0,"rgba(2,5,10,0)");fvg.addColorStop(0.5,"rgba(2,5,10,0)");
+  fvg.addColorStop(0.78,"rgba(2,5,10,"+(offl?0.2:0.3)+")");fvg.addColorStop(1,"rgba(2,5,10,0)");
+  g.fillStyle=fvg;g.fillRect(-150,-150,300,300);g.restore();
+  /* OP · menace pass (squiddy) — the stare as horror under-light: the red
+     cluster rakes the underside of each brow lobe DIMLY, a face lit from
+     below. Matte value shift only — source-atop washes, no lighter comp,
+     no specular, radial falloff dead inside its own bounds. */
+  if(!offl){
+    g.save();g.globalCompositeOperation="source-atop";
+    [-1,1].forEach(function(sg){
+      g.save();g.translate(HC.x+sg*46,HC.y+10);g.scale(1,0.42);
+      var bu=g.createRadialGradient(0,0,2,0,0,46);
+      bu.addColorStop(0,"rgba(196,44,26,"+(0.12+0.05*pulse)+")");
+      bu.addColorStop(1,"rgba(196,44,26,0)");
+      g.fillStyle=bu;g.fillRect(-46,-46,92,92);g.restore();});
+    g.restore();}
   /* mandible fringe: small dark claws hanging along the chin curve,
      twitching independently — an underbite of hooks, not a grin */
   /* NOT A MOUTH. Every version of a fringe of tapered spikes along a jaw
@@ -642,6 +734,18 @@ function drawUnit(t,st){
   uj.addColorStop(0,"rgba(2,5,10,0.5)");uj.addColorStop(0.55,"rgba(2,5,10,0.26)");
   uj.addColorStop(1,"rgba(2,5,10,0)");
   g.fillStyle=uj;g.fillRect(-66,-66,132,132);g.restore();
+  /* OP · menace pass (squiddy) — the campfire read, lower half: the eye
+     cluster's glow catches the TOPS of the manipulator stubs dimly. Matte
+     value shift only (source-atop, no lighter, no specular, no per-stub
+     edge) so the stubs stay the operator's mandated dead-matte gear and
+     can never read as lit teeth. Radial falloff, no printable edge. */
+  if(!offl){
+    g.save();g.globalCompositeOperation="source-atop";
+    g.translate(HC.x,HC.y+72);g.scale(1,0.38);
+    var su=g.createRadialGradient(0,0,2,0,0,58);
+    su.addColorStop(0,"rgba(190,42,26,"+(0.11+0.04*pulse)+")");
+    su.addColorStop(1,"rgba(190,42,26,0)");
+    g.fillStyle=su;g.fillRect(-58,-58,116,116);g.restore();}
   [g,RE].forEach(function(c){c.restore();});
 
   /* ---- 4 · FRONT LIMBS, and the only joints that have to be believed ----
@@ -715,13 +819,25 @@ function drawUnit(t,st){
        wrong-scale claws sitting on the floor. Their endpoints are raised so
        stem AND claw stay fully above the tray, visibly attached. */
     [[cx+56+HX,RT-30],[cx+128,RT+60],[cx+196,RT+118],[cx+150,RT+148+sw2*6]],
-    [[cx-30+HX,RT-22],[cx-76,RT+60],[cx-16,RT+112],[cx-64,RT+146+sw*5]],
-    [[cx+30+HX,RT-22],[cx+54,RT+92],[cx+96,RT+110],[cx+40,RT+150-sw*5]]
+    /* OP · menace pass (squiddy) — posture: these two mid whips no longer
+       hang slack under the hub. Both are re-posed as taut strike arcs —
+       drawn-bow curves, not S-drift — cocked HIGH and curling forward over
+       the room, claws held open. Left one cocks beside the left hump; right
+       one climbs past the cheek and hooks its claw forward-down like a
+       scorpion tail. Both stay wide of the face bowl (the face is never
+       crossed by its own limbs) and their old deck shadow pools moved with
+       them (see the pool list in drawScene). Offline poses untouched —
+       dead limbs still crumple where they fall. */
+    [[cx-30+HX,RT-22],[cx-120,RT-44],[cx-172,264],[cx-126,224+sw*4]],
+    [[cx+30+HX,RT-30],[cx+170,RT-30],[cx+215,210],[cx+150,262-sw2*5]]
   ];
   FRONT.forEach(function(P,fi){
-    var pts=whip(P,13,4.5,46);
+    /* OP · menace pass (squiddy) — fi 0 carries a scar mid-stem; the two
+       re-posed strike whips (fi 2,3) hold their prongs open and tense. */
+    var pts=whip(P,13,4.5,46,fi===0?0.52:undefined);
     var e=pts[pts.length-1],pe=pts[pts.length-2];
-    grapple(e[0],e[1],Math.atan2(e[1]-pe[1],e[0]-pe[0]),offl?0:0.7+0.25*Math.sin(t*2+fi),true);
+    grapple(e[0],e[1],Math.atan2(e[1]-pe[1],e[0]-pe[0]),
+      offl?0:(fi>=2?1.05+0.1*Math.sin(t*2+fi):0.7+0.25*Math.sin(t*2+fi)),true);
     // the mount goes on LAST, over the limb's own root, so it clamps it
     var q0=pts[0],q1=pts[2];
     whipMount(q0[0],q0[1],Math.atan2(q1[1]-q0[1],q1[0]-q0[0]),HS*(fi<2?0.94:0.8));
@@ -2008,14 +2124,27 @@ function drawScene(t,st){
        behind each thrown-high tip lamp. */
     var hovX3=Math.sin(t*0.53)*4, hov3=Math.sin(t*0.9)*5+Math.sin(t*0.37)*3;
     var EYX=UX+hovX3, EYY=374+hov3, sw3=Math.sin(t*0.9);
+    /* OP · menace pass (squiddy) — the room fears it: a soft pool of dark
+       pulled in round the unit before its own light goes down, so the wall
+       and deck nearest the thing sit a shade under the rest of the hall.
+       Radial, dies to zero at its own fill bound — no printed edge. */
+    var drd=S.createRadialGradient(EYX,EYY-34,40,EYX,EYY-34,330);
+    drd.addColorStop(0,"rgba(0,1,4,0.16)");drd.addColorStop(0.6,"rgba(0,1,4,0.09)");
+    drd.addColorStop(1,"rgba(0,1,4,0)");
+    S.fillStyle=drd;S.beginPath();S.arc(EYX,EYY-34,330,0,7);S.fill();
+    /* OP · menace pass (squiddy) — and the bounce is ALIVE: a small
+       multiplicative flicker rides the red wall/tip glow so the light
+       breathes like a predator's, not a lamp's. ±7% — near-invariant in a
+       still (t=1.3 lands at ~0.96x), obvious in motion. */
+    var flk=1+0.07*Math.sin(t*11)*Math.sin(t*4.3);
     S.save();S.globalCompositeOperation="lighter";
     var rg=S.createRadialGradient(EYX,EYY,12,EYX,EYY,200);
-    rg.addColorStop(0,"rgba(255,56,30,0.28)");rg.addColorStop(0.6,"rgba(255,56,30,0.165)");
+    rg.addColorStop(0,"rgba(255,56,30,"+(0.28*flk)+")");rg.addColorStop(0.6,"rgba(255,56,30,"+(0.165*flk)+")");
     rg.addColorStop(1,"rgba(255,56,30,0)");
     S.fillStyle=rg;S.beginPath();S.arc(EYX,EYY,200,0,7);S.fill();
     [[386,166+sw3*5],[824,180-sw3*5]].forEach(function(tk){
       var tkg=S.createRadialGradient(tk[0],tk[1],2,tk[0],tk[1],58);
-      tkg.addColorStop(0,"rgba(255,64,40,0.13)");tkg.addColorStop(1,"rgba(255,64,40,0)");
+      tkg.addColorStop(0,"rgba(255,64,40,"+(0.13*flk)+")");tkg.addColorStop(1,"rgba(255,64,40,0)");
       S.fillStyle=tkg;S.beginPath();S.arc(tk[0],tk[1],58,0,7);S.fill();});
     S.restore();}
   if(offl){
@@ -2090,7 +2219,12 @@ function drawScene(t,st){
        HUBS, not the talons: the prongs all curl down-left of the hub, so
        each pool shifts to the talon-tip centroid (stage x ≈ 424/522/625/
        664/736). Tips stay airborne — this is shadow on the deck only. */
-    [[-78,18,46,0.92],[25,18,44,0.97],[64,18,36,0.9],[136,18,40,0.92],[-176,8,26,0.5]].forEach(function(wp){
+    /* OP · menace pass (squiddy) — pools re-aimed again: the two mid whips
+       that hung at stage x≈522/625 are now cocked high (no deck shadow to
+       cast), and the presented foreground claw (B5, 1.35x, stage x≈660)
+       gets a wider, deeper pool under its open talons. F1 and B4 keep
+       theirs. Still a hover — shadow on the deck, nothing touches. */
+    [[55,20,50,0.97],[136,18,40,0.92],[-176,8,26,0.5]].forEach(function(wp){
       S.save();S.translate(UX+wp[0],GYS+wp[1]);S.scale(1,0.42);
       var shw=S.createRadialGradient(0,0,2,0,0,wp[2]);
       shw.addColorStop(0,"rgba(0,0,0,"+wp[3]+")");shw.addColorStop(0.5,"rgba(0,0,0,"+(wp[3]*0.55)+")");
